@@ -8,12 +8,15 @@ find_package(CURL REQUIRED)
 
 add_executable(coordinator
         coordinator.cpp
+        Coordinator/Coordinator.cpp
+        Worker/Worker.cpp
         CurlEasyPtr.cpp
         )
 target_link_libraries(coordinator PUBLIC CURL::libcurl)
 
 add_executable(worker
         worker.cpp
+        Worker/Worker.cpp
         CurlEasyPtr.cpp
         )
 target_link_libraries(worker PUBLIC CURL::libcurl)

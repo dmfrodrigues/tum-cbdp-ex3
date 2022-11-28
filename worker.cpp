@@ -1,3 +1,4 @@
+#include "Worker/Worker.h"
 #include <iostream>
 
 /// Worker process that receives a list of URLs and reports the result
@@ -9,6 +10,9 @@ int main(int argc, char* argv[]) {
       std::cerr << "Usage: " << argv[0] << " <host> <port>" << std::endl;
       return 1;
    }
+
+   // TODO Use dynamic addresses instead. Ta se a ver a pass no runTest.sh, onde usam localhost e nao funfa
+   Worker("127.0.0.1", atoi(argv[2]));
 
    // TODO:
    //    1. connect to coordinator specified by host and port

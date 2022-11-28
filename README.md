@@ -16,7 +16,7 @@ Workers notify leader when they come in, establish individual TCP connection for
 * How can we distribute work "fairly" among workers?
 Each worker asks for more work when they are finished.
 * With what messages do leader - worker communicate?
-Worker can send ready messages to worker, which contains a port that it will use to listen for files to process.
+Worker can send ready messages to coordinator, which contains a port that it will use to listen for files to process.
 As soon as the leader processes this message, it will send a work message to the specified worker port that contains the url to be retrieved.
 After this, when the work finishes retrieving the file, it sends it back to the client with a ready message with its content.
 * How can we detect failed / crashed workers?
