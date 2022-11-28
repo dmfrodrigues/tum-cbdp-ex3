@@ -12,10 +12,17 @@ Before starting to write code, consider the following design questions.
 ## 1.Design Questions:
 
 * How does the leader process know the number of alive workers?
+Workers notify leader when they come in, establish individual TCP connection for each worker.
 * How can we distribute work "fairly" among workers?
+Each worker asks for more work when they are finished.
 * With what messages do leader - worker communicate?
+Worker can send ready messages to worker, which contains a port that it will use to listen for files to process.
+As soon as the leader processes this message, it will send a work message to the specified worker port that contains the url to be retrieved.
+After this, when the work finishes retrieving the file, it sends it back to the client with a ready message with its content.
 * How can we detect failed / crashed workers?
+The server assumes that a worker has crashed when its TCP connection to it has closed unexpectedly.
 * How do we recover when a worker fails?
+The worker connects again to the leader and asks for new work to be done. All work done when the crash happened is lost.
 
 ## 2.Scalability Questions:
 
