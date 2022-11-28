@@ -53,7 +53,7 @@ Worker::Worker(const std::string &coordName, const int coordPort) : coordPort(co
    if (!connected)
       throw std::runtime_error("connect() failed");
 
-   free(req);
+   freeaddrinfo(req);
 }
 
 size_t Worker::parseFile(std::stringstream &chunkName) {

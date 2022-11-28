@@ -12,9 +12,7 @@ test -f "$1" || (echo "\"$1\": No such file or directory" && exit 1)
 data/splitCSV.sh "$1"
 
 # Spawn the coordinator process
-valgrind cmake-build-debug/coordinator "file://$(dirname "$(realpath "$1")")/filelist.csv" $PORT &
-
-sleep 2
+cmake-build-debug/coordinator "file://$(dirname "$(realpath "$1")")/filelist.csv" $PORT &
 
 # Spawn some workers
 for _ in {1..1}; do

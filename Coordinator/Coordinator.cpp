@@ -48,7 +48,7 @@ Coordinator::Coordinator(const std::string &name, const int port) : port(port) {
       throw std::runtime_error("perform_listen() failed");
    }
 
-   free(req);
+   freeaddrinfo(req);
 }
 
 size_t Coordinator::parseFile(std::string listUrl) {
