@@ -27,7 +27,7 @@ void Coordinator::run(){
    }
 }
 
-size_t Coordinator::processFile(std::string) {
+size_t Coordinator::processFile(std::string listUrl) {
    // TODO:
    //    1. Allow workers to connect
    //       socket(), bind(), listen(), accept(), see: https://beej.us/guide/bgnet/html/#system-calls-or-bust
@@ -37,6 +37,10 @@ size_t Coordinator::processFile(std::string) {
    //       recv() the results
    // Hint: Think about how you track which worker got what work
    
+   // Download the file list
+   auto curl = CurlEasyPtr::easyInit();
+   curl.setUrl(listUrl);
+   std::stringstream fileList = curl.performToStringStream();
 
    return 0;
 }
