@@ -17,7 +17,7 @@ private:
 public:
    Worker(const std::string& coordName, const int coordPort);
    void run();
-   size_t parseFile(std::stringstream& chunkName);
+   size_t processChunk(std::stringstream& chunkName);
 };
 
 #endif

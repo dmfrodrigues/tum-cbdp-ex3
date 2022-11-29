@@ -30,7 +30,7 @@ void Worker::run() {
 
       curl.setUrl(chunkURL);
       std::stringstream ss = curl.performToStringStream();
-      size_t result = parseFile(ss);
+      size_t result = processChunk(ss);
 
       MessageWork response(Message::Type::RESPONSE);
       response.result = result;
@@ -40,7 +40,7 @@ void Worker::run() {
    }
 }
 
-size_t Worker::parseFile(std::stringstream &chunkName) {
+size_t Worker::processChunk(std::stringstream &chunkName) {
    size_t result = 0;
    for (std::string row; std::getline(chunkName, row, '\n');) {
       std::stringstream rowStream = std::stringstream(std::move(row));
