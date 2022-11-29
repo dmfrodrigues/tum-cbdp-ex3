@@ -9,4 +9,6 @@ public:
 private:
     virtual void serializeContents(std::stringstream &ss) const;
     virtual bool deserializeContents(std::stringstream &ss);
+public:
+    MessageWork(Message::Type t);
 };

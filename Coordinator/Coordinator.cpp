@@ -14,41 +14,18 @@
 using namespace std;
 
 Coordinator::Coordinator(const std::string &name, const int port) : port(port) {
-   addrinfo hints{}, *req = nullptr;
-   memset(&hints, 0, sizeof(addrinfo));
+   socket.bind(name, port);
+   cout << "Coordinator, " << name << " " << port << endl;
+}
 
-   hints.ai_family = AF_INET;
-   hints.ai_addrlen = sizeof(struct sockaddr_in);
-
-   hints.ai_socktype = SOCK_STREAM;
-   hints.ai_flags = IPPROTO_TCP;
-
-   cout << name << " " << port << endl;
-
-   if (getaddrinfo(name.c_str(), std::to_string(port).c_str(), &hints, &req) != 0) {
-      throw std::runtime_error("getaddrinfo() failed");
+void Coordinator::run(){
+   while(true){
+      Socket workerSocket = socket.accept();
+      cout << "Coordinator: accepted connection" << endl;
+      Message *m = workerSocket.receive();
+      cout << "Coordinator: got message, operation=" << static_cast<int>(m->operation) << endl;
+      cout << "L27" << endl;
    }
-
-   socket_fd = socket(req->ai_family, req->ai_socktype, req->ai_protocol);
-   if (socket_fd == -1) {
-      throw std::runtime_error("socket() failed");
-   }
-
-   // allow kernel to rebind address even when in TIME_WAIT state
-   int yes = 1;
-   if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
-      throw std::runtime_error("setsockopt() failed");
-   }
-
-   if (bind(socket_fd, req->ai_addr, req->ai_addrlen) == -1) {
-      throw std::runtime_error("perform_bind() failed");
-   }
-
-   if (listen(socket_fd, BACKLOG) == -1) {
-      throw std::runtime_error("perform_listen() failed");
-   }
-
-   freeaddrinfo(req);
 }
 
 size_t Coordinator::parseFile(std::string listUrl) {

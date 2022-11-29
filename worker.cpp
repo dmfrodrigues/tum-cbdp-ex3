@@ -1,4 +1,5 @@
 #include "Worker/Worker.h"
+#include "CurlEasyPtr.h"
 #include <iostream>
 
 /// Worker process that receives a list of URLs and reports the result
@@ -11,8 +12,11 @@ int main(int argc, char* argv[]) {
       return 1;
    }
 
+   CurlGlobalSetup curlSetup;
+
    // TODO Use dynamic addresses instead. Ta se a ver a pass no runTest.sh, onde usam localhost e nao funfa
-   Worker("127.0.0.1", atoi(argv[2]));
+   Worker w("127.0.0.1", atoi(argv[2]));
+   w.run();
 
    // TODO:
    //    1. connect to coordinator specified by host and port

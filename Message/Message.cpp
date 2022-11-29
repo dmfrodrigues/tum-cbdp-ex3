@@ -2,6 +2,11 @@
 
 using namespace std;
 
+Message::Message(Message::Type t, Message::Operation op) :
+    type(t),
+    operation(op)
+{}
+
 string Message::serialize() const {
     stringstream ss;
     ss.write(reinterpret_cast<const char*>(&type), sizeof(type));
@@ -16,3 +21,5 @@ bool Message::deserialize(const string &buf){
     ss.read(reinterpret_cast<char*>(&operation), sizeof(operation));
     return deserializeContents(ss);
 }
+
+Message::~Message(){}

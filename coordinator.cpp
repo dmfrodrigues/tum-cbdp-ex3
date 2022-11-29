@@ -12,8 +12,7 @@ int main(int argc, char* argv[]) {
    }
 
    Coordinator coordinator = Coordinator("127.0.0.1", atoi(argv[2]));
-   size_t result = coordinator.parseFile(std::string(argv[1]));
-   std::cout << result << std::endl;
+   coordinator.run();
 
    return 0;
 }

@@ -22,6 +22,10 @@ public:
         WORK = 2
     } operation;
 
+    Message(Type t, Operation op);
+
     std::string serialize() const;
     bool deserialize(const std::string &buf);
+
+    virtual ~Message();
 };

@@ -8,52 +8,36 @@
 #include <string>
 #include <string_view>
 
+#include <cassert>
+
 using namespace std;
 using namespace std::literals;
 
-Worker::Worker(const std::string &coordName, const int coordPort) : coordPort(coordPort) {
-   addrinfo hints{}, *req = nullptr;
-   memset(&hints, 0, sizeof(addrinfo));
+Worker::Worker(const std::string &coordName, const int coordPort) :
+   curl(CurlEasyPtr::easyInit())
+{
+   socket.connect(coordName, coordPort);
+   MessageHeartbeat m(Message::Type::REQUEST);
+   socket.send(&m);
+}
 
-   hints.ai_family = AF_INET;
-   hints.ai_addrlen = sizeof(struct sockaddr_in);
+void Worker::run() {
+   while(true){
+      MessageWork *m = dynamic_cast<MessageWork*>(socket.receive());
+      assert(m != nullptr);
 
-   hints.ai_socktype = SOCK_STREAM;
-   hints.ai_flags = IPPROTO_TCP;
+      const string &chunkURL = m->chunkURLs.at(0);
 
-   cout << coordName << " " << coordPort << endl;
+      curl.setUrl(chunkURL);
+      std::stringstream ss = curl.performToStringStream();
+      size_t result = parseFile(ss);
 
-   if (getaddrinfo(coordName.c_str(), std::to_string(coordPort).c_str(), &hints, &req) != 0) {
-      throw std::runtime_error("getaddrinfo() failed");
+      MessageWork response(Message::Type::RESPONSE);
+      response.result = result;
+      socket.send(&response);
+
+      delete m;
    }
-
-   socket_fd = socket(req->ai_family, req->ai_socktype, req->ai_protocol);
-   if (socket_fd == -1) {
-      throw std::runtime_error("socket() failed");
-   }
-
-   // allow kernel to rebind address even when in TIME_WAIT state
-   int yes = 1;
-   if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
-      throw std::runtime_error("setsockopt() failed");
-   }
-
-   bool connected = false;
-   int i = 0;
-   while (!connected && i < NUMBER_RETRIES_CONNECT) {
-      if (connect(socket_fd, req->ai_addr, req->ai_addrlen) == -1) {
-         perror("connect() failed");
-         usleep(SLEEP_MICROS);
-         ++i;
-      } else {
-         connected = true;
-      }
-   }
-
-   if (!connected)
-      throw std::runtime_error("connect() failed");
-
-   freeaddrinfo(req);
 }
 
 size_t Worker::parseFile(std::stringstream &chunkName) {

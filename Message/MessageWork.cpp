@@ -2,6 +2,10 @@
 
 using namespace std;
 
+MessageWork::MessageWork(Message::Type t) :
+    Message(t, Message::Operation::WORK)
+{}
+
 void MessageWork::serializeContents(stringstream &ss) const {
     const size_t &numberChunks = chunkURLs.size();
     ss.write(reinterpret_cast<const char*>(&numberChunks), sizeof(numberChunks));
