@@ -79,7 +79,9 @@ bool Coordinator::processWorkerResult(int sd) {
 
    Message *m = wd.socket.receive();
    if (m == nullptr) {
+      #ifdef LOG
       cout << "[C] Worker " << sd << " has died" << endl;
+      #endif
       return false;
    }
 
