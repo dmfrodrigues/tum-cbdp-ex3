@@ -42,7 +42,7 @@ void Worker::run() {
 
       cout << "[W] Sent response of chunk '" << chunkURL << "'" << endl;
 
-      pthread_yield();
+      sched_yield();
    }
 }
 
