@@ -18,7 +18,9 @@ using namespace std;
 
 Coordinator::Coordinator(const std::string &name, const int port) {
    socket.bind(name, port);
+   #ifdef LOG
    cout << "[C] " << name << " " << port << endl;
+   #endif
 
    // pollSockets.reserve(20);
 
@@ -38,7 +40,9 @@ void Coordinator::acceptConnection() {
    wd.work = {list<string>(),};
    workers.insert({worker.getSd(), wd});
 
+   #ifdef LOG
    cout << "[C] " << "Accepted worker with sd " << worker.getSd() << endl;
+   #endif
 
    // Add worker pollfd
    struct pollfd pfd = {};
@@ -59,8 +63,6 @@ void Coordinator::sendWork(int sd) {
    
    unfinishedChunks += 1;
 
-   // cout << "[C] Dispatching new chunk '" << nextChunk << "'" << endl;
-
    workerDetails &wd = workers.at(sd);
    wd.work.push_back(nextChunk);
 
@@ -68,7 +70,9 @@ void Coordinator::sendWork(int sd) {
    m.chunkURLs = vector<string>({nextChunk});
    wd.socket.send(&m);
 
+   #ifdef LOG
    cout << "[C] Dispatched chunk '" << nextChunk << "' to worker " << sd << endl;
+   #endif
 }
 
 void Coordinator::processWorkerResult(int sd) {
@@ -88,7 +92,9 @@ void Coordinator::processWorkerResult(int sd) {
    totalResults += m->result;
    unfinishedChunks -= 1;
 
+   #ifdef LOG
    cout << "[C] Worker " << sd << " processed chunk '" << m->chunkURLs[0] << "' with result " << m->result << endl;
+   #endif
 
    delete m;
 
@@ -157,7 +163,9 @@ size_t Coordinator::processFile(std::string listUrl) {
    // Cleanup
    cleanup();
 
+   #ifdef LOG
    cout << "[C] Finished processing file, found " << totalResults << " matches" << endl;
+   #endif
 
    return totalResults; // TODO: retunr result
 }

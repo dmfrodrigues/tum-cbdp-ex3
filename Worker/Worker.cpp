@@ -29,7 +29,9 @@ void Worker::run() {
       const string chunkURL = m->chunkURLs.at(0);
       delete m;
 
+      #ifdef LOG
       cout << "[W] Received chunk '" << chunkURL << "'" << endl;
+      #endif
 
       curl.setUrl(chunkURL);
       std::stringstream ss = curl.performToStringStream();
@@ -40,7 +42,9 @@ void Worker::run() {
       response.chunkURLs = vector<string>({chunkURL});
       socket.send(&response);
 
+      #ifdef LOG
       cout << "[W] Sent response of chunk '" << chunkURL << "'" << endl;
+      #endif
 
       sched_yield();
    }
