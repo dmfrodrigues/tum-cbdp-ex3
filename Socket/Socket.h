@@ -29,6 +29,7 @@ public:
     void connect(const std::string &name, int port);
 
     Socket accept();
+    void close();
 
     void send(const Message *m);
     Message* receive();

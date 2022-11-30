@@ -57,6 +57,10 @@ void Socket::bind(const string &name, int port) {
    }
 }
 
+void Socket::close() {
+   ::close(sd);
+}
+
 Socket Socket::accept() {
    int new_fd = ::accept(sd, nullptr, nullptr);
    return Socket(new_fd);

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+PORT=8040
 
 if [ "$#" -ne 1 ]; then
   echo "Usage: $(basename "$0") <URL://filelist.csv>"
@@ -7,11 +8,11 @@ if [ "$#" -ne 1 ]; then
 fi
 
 # Spawn the coordinator process
-cmake-build-debug/coordinator "$1" 4242 &
+cmake-build-debug/coordinator "$1" $PORT &
 
 # Spawn some workers
 for _ in {1..4}; do
-  cmake-build-debug/worker "localhost" "4242" &
+  cmake-build-debug/worker "localhost" $PORT &
 done
 
 # Now we simulate a failing worker.

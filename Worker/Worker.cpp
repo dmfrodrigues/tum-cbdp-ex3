@@ -22,12 +22,14 @@ Worker::Worker(const std::string &coordName, const int coordPort) :
 }
 
 void Worker::run() {
-   while(true){
-      MessageWork *m = dynamic_cast<MessageWork*>(socket.receive()); 
+   while(true) {
+      Message *m = socket.receive();
       if (m == nullptr) return;
 
-      const string chunkURL = m->chunkURLs.at(0);
-      delete m;
+      MessageWork *mw = dynamic_cast<MessageWork*>(m); 
+
+      const string chunkURL = mw->chunkURLs.at(0);
+      delete mw;
 
       #ifdef LOG
       cout << "[W] Received chunk '" << chunkURL << "'" << endl;

@@ -6,6 +6,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <queue>
 
 #include <sys/poll.h>
 
@@ -21,10 +22,13 @@ typedef struct workerDetails workerDetails;
 
 class Coordinator {
 private:
+   const static int POLL_TIMEOUT = 10000;
+
    Socket socket;
    std::map<int, workerDetails> workers;
    std::vector<struct pollfd> pollSockets;
-   std::stringstream chunks;
+   
+   std::queue<std::string> remainingChunks;
 
    size_t totalResults;
    int unfinishedChunks;
@@ -34,6 +38,8 @@ private:
    void acceptConnection();
    void loop();
    void cleanup();
+   void cleanupDeadWorker(int dw);
+
 
 public:
    Coordinator(const std::string& name, const int p);
