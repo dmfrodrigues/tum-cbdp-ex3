@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
    CurlGlobalSetup curlSetup;
 
    Coordinator coordinator = Coordinator("127.0.0.1", atoi(argv[2]));
-   coordinator.processFile(argv[1]);
+   size_t res = coordinator.processFile(argv[1]);
 
-   return 0;
+   return (int) res;
 }
