@@ -24,9 +24,10 @@ Worker::Worker(const std::string &coordName, const int coordPort) :
 void Worker::run() {
    while(true){
       MessageWork *m = dynamic_cast<MessageWork*>(socket.receive()); 
-      assert(m != nullptr);
+      if (m == nullptr) return;
 
-      const string &chunkURL = m->chunkURLs.at(0);
+      const string chunkURL = m->chunkURLs.at(0);
+      delete m;
 
       cout << "[W] Received chunk '" << chunkURL << "'" << endl;
 
@@ -36,9 +37,10 @@ void Worker::run() {
 
       MessageWork response(Message::Type::RESPONSE);
       response.result = result;
+      response.chunkURLs = vector<string>({chunkURL});
       socket.send(&response);
 
-      delete m;
+      cout << "[W] Sent response of chunk '" << chunkURL << "'" << endl;
    }
 }
 

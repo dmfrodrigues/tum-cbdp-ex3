@@ -33,6 +33,7 @@ private:
    void sendWork(int sd);
    void acceptConnection();
    void loop();
+   void cleanup();
 
 public:
    Coordinator(const std::string& name, const int p);

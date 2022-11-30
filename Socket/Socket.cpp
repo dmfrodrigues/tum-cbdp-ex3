@@ -90,9 +90,13 @@ void Socket::send(const Message *m) {
 
 Message* Socket::receive() {
    size_t sz;
-   read(sd, &sz, sizeof(sz));
+   size_t n = read(sd, &sz, sizeof(sz));
+   if (n == 0) return nullptr;
+   
    char buf[Message::MAX_SIZE];
-   read(sd, buf, sz);
+   memset(buf, 0, Message::MAX_SIZE);
+   n = read(sd, buf, sz);
+   if (n == 0) return nullptr;
 
    stringstream ss;
    ss.write(buf, sz);
@@ -103,7 +107,6 @@ Message* Socket::receive() {
 bool Socket::operator<(const Socket&s) const {
     return sd < s.sd;
 };
-
 
 Socket::~Socket(){
    freeaddrinfo(req);

@@ -32,7 +32,7 @@ Coordinator::Coordinator(const std::string &name, const int port) {
 void Coordinator::acceptConnection() {
    Socket worker = socket.accept();
    
-   // Add new entry to the workers map
+   // Add entry to the workers map
    workerDetails wd = {};
    wd.socket = worker;
    wd.work = {list<string>(),};
@@ -40,7 +40,7 @@ void Coordinator::acceptConnection() {
 
    cout << "[C] " << "Accepted worker with sd " << worker.getSd() << endl;
 
-   // Add new worker pollfd
+   // Add worker pollfd
    struct pollfd pfd = {};
    pfd.fd = worker.getSd();
    pfd.events = POLLIN;
@@ -50,15 +50,18 @@ void Coordinator::acceptConnection() {
 }
 
 void Coordinator::sendWork(int sd) {
-   if (chunks.eof()) {
-      return;
-   }
+   if (chunks.eof()) return;
    
    string nextChunk;
    getline(chunks, nextChunk, '\n');
+   
+   if (nextChunk.empty()) return;
+   
    unfinishedChunks += 1;
 
-   workerDetails wd = workers.at(sd);
+   // cout << "[C] Dispatching new chunk '" << nextChunk << "'" << endl;
+
+   workerDetails &wd = workers.at(sd);
    wd.work.push_back(nextChunk);
 
    MessageWork m(Message::Type::REQUEST);
@@ -69,14 +72,14 @@ void Coordinator::sendWork(int sd) {
 }
 
 void Coordinator::processWorkerResult(int sd) {
-   workerDetails wd = workers.at(sd);
+   workerDetails &wd = workers.at(sd);
 
-   MessageWork *m = dynamic_cast<MessageWork*>(socket.receive()); 
+   MessageWork *m = dynamic_cast<MessageWork*>(wd.socket.receive()); 
    assert(m != nullptr);
 
    auto it = find(wd.work.begin(), wd.work.end(), m->chunkURLs.at(0));
-   if (it != wd.work.end()) {
-      cerr << "[C] Worker " << sd << " returned unexpected chunk" << endl;
+   if (it == wd.work.end()) {
+      cerr << "[C] Worker " << sd << " returned unexpected chunk '" << m->chunkURLs.at(0) << "'" << endl;
       delete m;
       return;
    }
@@ -84,6 +87,8 @@ void Coordinator::processWorkerResult(int sd) {
    wd.work.erase(it);
    totalResults += m->result;
    unfinishedChunks -= 1;
+
+   cout << "[C] Worker " << sd << " processed chunk '" << m->chunkURLs[0] << "' with result " << m->result << endl;
 
    delete m;
 
@@ -108,7 +113,6 @@ void Coordinator::loop() {
          } else {
             // Worker socket input
             processWorkerResult(element.fd);
-            cout << "[C] Worker input" << endl;
          }
       } else if (element.revents == POLLHUP) {
          // Process peer closed socket
@@ -123,11 +127,9 @@ void Coordinator::loop() {
    
 }
 
-
-   // Socket workerSocket = socket.accept();
-   // cout << "Coordinator: accepted connection" << endl;
-   // Message *m = workerSocket.receive();
-   // cout << "Coordinator: got message, operation=" << static_cast<int>(m->operation) << endl;
+void Coordinator::cleanup() {
+   // TODO:
+}
 
 size_t Coordinator::processFile(std::string listUrl) {
    // TODO:
@@ -151,6 +153,9 @@ size_t Coordinator::processFile(std::string listUrl) {
    do { // Until result
       loop();
    } while ((unfinishedChunks > 0 || !chunks.eof()));
+
+   // Cleanup
+   cleanup();
 
    cout << "[C] Finished processing file, found " << totalResults << " matches" << endl;
 

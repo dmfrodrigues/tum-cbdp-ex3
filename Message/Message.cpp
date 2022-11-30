@@ -18,11 +18,13 @@ string Message::serialize() const {
     return ss.str();
 }
 
-bool Message::deserialize(const string &buf){
-    stringstream ss(buf);
-    ss.read(reinterpret_cast<char*>(&type), sizeof(type));
-    ss.read(reinterpret_cast<char*>(&operation), sizeof(operation));
-    return deserializeContents(ss);
-}
+// bool Message::deserialize(const string &buf){
+//     stringstream ss(buf);
+//     ss.read(reinterpret_cast<char*>(&type), sizeof(type));
+//     cout << "type deserialize: " << static_cast<short>(type) << endl;
+//     ss.read(reinterpret_cast<char*>(&operation), sizeof(operation));
+//     cout << "OP deserialize: " << static_cast<short>(operation) << endl;
+//     return deserializeContents(ss);
+// }
 
 Message::~Message(){}

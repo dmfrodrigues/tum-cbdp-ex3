@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-PORT=8021
+PORT=8026
 
 if [ "$#" -ne 1 ]; then
   echo "Usage: $(basename "$0") <path/to/file.csv>"
@@ -15,7 +15,7 @@ data/splitCSV.sh "$1"
 cmake-build-debug/coordinator "file://$(dirname "$(realpath "$1")")/filelist.csv" $PORT &
 
 # Spawn some workers
-for _ in {1..1}; do
+for _ in {1..4}; do
   cmake-build-debug/worker "localhost" "$PORT" &
 done
 

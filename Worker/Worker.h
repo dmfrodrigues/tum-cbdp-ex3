@@ -9,7 +9,7 @@
 class Worker {
 private:
    static const int NUMBER_RETRIES_CONNECT = 10;
-   static const useconds_t SLEEP_MICROS = 100000;
+   static const useconds_t SLEEP_MICROS = 50000;
 
    Socket socket;
 
