@@ -1,10 +1,10 @@
 #include "MessageFactory.h"
 
+#include <iostream>
+
 using namespace std;
 
-Message* MessageFactory::factoryMethod(const string &buf) const {
-    stringstream ss(buf);
-    
+Message* MessageFactory::factoryMethod(stringstream &ss) const {
     Message::Type type;
     ss.read(reinterpret_cast<char*>(&type), sizeof(type));
 

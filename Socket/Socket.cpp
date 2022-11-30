@@ -1,5 +1,6 @@
 #include "Socket.h"
 
+#include <iostream>
 #include <netdb.h>
 #include <sys/un.h>
 #include <stdexcept>
@@ -12,7 +13,10 @@ MessageFactory Socket::messageFactory = MessageFactory();
 
 Socket::Socket() {}
 
-Socket::Socket(int fd) : fd(fd) {
+Socket::Socket(int fd) : sd(fd) { }
+
+int Socket::getSd() const {
+    return sd;
 }
 
 void Socket::init(const string &name, int port) {
@@ -29,14 +33,14 @@ void Socket::init(const string &name, int port) {
       throw runtime_error("getaddrinfo() failed");
    }
 
-   fd = socket(req->ai_family, req->ai_socktype, req->ai_protocol);
-   if (fd == -1) {
+   sd = socket(req->ai_family, req->ai_socktype, req->ai_protocol);
+   if (sd == -1) {
       throw runtime_error("socket() failed");
    }
 
    // allow kernel to rebind address even when in TIME_WAIT state
    int yes = 1;
-   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+   if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
       throw runtime_error("setsockopt() failed");
    }
 }
@@ -44,17 +48,17 @@ void Socket::init(const string &name, int port) {
 void Socket::bind(const string &name, int port) {
    init(name, port);
 
-   if (::bind(fd, req->ai_addr, req->ai_addrlen) == -1) {
+   if (::bind(sd, req->ai_addr, req->ai_addrlen) == -1) {
       throw runtime_error("perform_bind() failed");
    }
 
-   if (listen(fd, BACKLOG) == -1) {
+   if (listen(sd, BACKLOG) == -1) {
       throw runtime_error("perform_listen() failed");
    }
 }
 
 Socket Socket::accept() {
-   int new_fd = ::accept(fd, nullptr, nullptr);
+   int new_fd = ::accept(sd, nullptr, nullptr);
    return Socket(new_fd);
 }
 
@@ -64,8 +68,8 @@ void Socket::connect(const string &name, int port) {
    bool connected = false;
    int i = 0;
    while (!connected && i < NUMBER_RETRIES_CONNECT) {
-      if (::connect(fd, req->ai_addr, req->ai_addrlen) == -1) {
-         perror("connect() failed");
+      if (::connect(sd, req->ai_addr, req->ai_addrlen) == -1) {
+        //  perror("connect() failed");
          usleep(SLEEP_MICROS);
          ++i;
       } else {
@@ -77,22 +81,29 @@ void Socket::connect(const string &name, int port) {
       throw runtime_error("connect() failed");
 }
 
-void Socket::send(const Message *m){
+void Socket::send(const Message *m) {
    string msg = m->serialize();
    const size_t &sz = msg.size();
-   write(fd, &sz, sizeof(sz));
-   write(fd, msg.c_str(), sz);
+   write(sd, &sz, sizeof(sz));
+   write(sd, msg.data(), sz);
 }
 
-Message* Socket::receive(){
+Message* Socket::receive() {
    size_t sz;
-   read(fd, &sz, sizeof(sz));
+   read(sd, &sz, sizeof(sz));
    char buf[Message::MAX_SIZE];
-   read(fd, buf, sz);
-   buf[sz] = '\0';
-   string bufStr(buf);
-   return messageFactory.factoryMethod(bufStr);
+   read(sd, buf, sz);
+
+   stringstream ss;
+   ss.write(buf, sz);
+
+   return messageFactory.factoryMethod(ss);
 }
+
+bool Socket::operator<(const Socket&s) const {
+    return sd < s.sd;
+};
+
 
 Socket::~Socket(){
    freeaddrinfo(req);

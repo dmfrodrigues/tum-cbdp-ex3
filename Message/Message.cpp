@@ -1,5 +1,7 @@
 #include "Message.h"
 
+#include <iostream>
+
 using namespace std;
 
 Message::Message(Message::Type t, Message::Operation op) :
@@ -9,6 +11,7 @@ Message::Message(Message::Type t, Message::Operation op) :
 
 string Message::serialize() const {
     stringstream ss;
+    
     ss.write(reinterpret_cast<const char*>(&type), sizeof(type));
     ss.write(reinterpret_cast<const char*>(&operation), sizeof(operation));
     serializeContents(ss);

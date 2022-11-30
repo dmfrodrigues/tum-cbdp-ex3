@@ -17,16 +17,18 @@ Worker::Worker(const std::string &coordName, const int coordPort) :
    curl(CurlEasyPtr::easyInit())
 {
    socket.connect(coordName, coordPort);
-   MessageHeartbeat m(Message::Type::REQUEST);
-   socket.send(&m);
+   // MessageHeartbeat m(Message::Type::REQUEST);
+   // socket.send(&m);
 }
 
 void Worker::run() {
    while(true){
-      MessageWork *m = dynamic_cast<MessageWork*>(socket.receive());
+      MessageWork *m = dynamic_cast<MessageWork*>(socket.receive()); 
       assert(m != nullptr);
 
       const string &chunkURL = m->chunkURLs.at(0);
+
+      cout << "[W] Received chunk '" << chunkURL << "'" << endl;
 
       curl.setUrl(chunkURL);
       std::stringstream ss = curl.performToStringStream();

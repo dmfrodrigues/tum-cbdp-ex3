@@ -6,5 +6,5 @@
 
 class MessageFactory {
 public:
-    Message* factoryMethod(const std::string &buf) const;
+    Message* factoryMethod(std::stringstream &ss) const;
 };

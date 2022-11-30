@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-PORT=8013
+PORT=8021
 
 if [ "$#" -ne 1 ]; then
   echo "Usage: $(basename "$0") <path/to/file.csv>"
