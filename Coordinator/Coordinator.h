@@ -33,7 +33,7 @@ private:
    size_t totalResults;
    int unfinishedChunks;
 
-   void processWorkerResult(int sd);
+   bool processWorkerResult(int sd);
    void sendWork(int sd);
    void acceptConnection();
    void loop();

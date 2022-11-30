@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <fcntl.h>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -73,11 +74,14 @@ void Coordinator::sendWork(int sd) {
    #endif
 }
 
-void Coordinator::processWorkerResult(int sd) {
+bool Coordinator::processWorkerResult(int sd) {
    workerDetails &wd = workers.at(sd);
 
    Message *m = wd.socket.receive();
-   if (m == nullptr) return;
+   if (m == nullptr) {
+      cout << "[C] Worker " << sd << " has died" << endl;
+      return false;
+   }
 
    MessageWork *mw = dynamic_cast<MessageWork*>(m); 
 
@@ -85,7 +89,7 @@ void Coordinator::processWorkerResult(int sd) {
    if (it == wd.work.end()) {
       cerr << "[C] Worker " << sd << " returned unexpected chunk '" << mw->chunkURLs.at(0) << "'" << endl;
       delete mw;
-      return;
+      return false;
    }
 
    wd.work.erase(it);
@@ -99,6 +103,7 @@ void Coordinator::processWorkerResult(int sd) {
    delete mw;
 
    sendWork(sd);
+   return true;
 }
 
 void Coordinator::loop() {
@@ -116,14 +121,17 @@ void Coordinator::loop() {
    bool workersAwaitingConnection = false;
    list<int> deadWorkers = list<int>();
    for (const auto &element : pollSockets) {
-      if (element.revents & POLLIN)
-      {
+      if (element.revents == 0) continue;
+
+      if (element.revents & POLLIN) {
          if (element.fd == socket.getSd()) {
             // Worker attempting to connect
             workersAwaitingConnection = true;
          } else {
             // Worker socket input
-            processWorkerResult(element.fd);
+            if (!processWorkerResult(element.fd)) {
+               deadWorkers.push_back(element.fd);
+            }
          }
       } else if (element.revents & (POLLHUP | POLLNVAL | POLLERR)) {
          // Closed socket
@@ -134,8 +142,7 @@ void Coordinator::loop() {
             deadWorkers.push_back(element.fd);
          }
       } else {
-         // Process critital error
-         cerr << "IMGAGINA CRITICAL ERRORS LMAO" << element.revents << endl;
+         // Do Nothing
       }
    }
 
@@ -202,7 +209,7 @@ size_t Coordinator::processFile(std::string listUrl) {
 
    do { // Until result
       loop();
-   } while (unfinishedChunks > 0 || !chunks.eof());
+   } while (unfinishedChunks > 0 || !remainingChunks.empty());
 
    // Cleanup
    cleanup();
