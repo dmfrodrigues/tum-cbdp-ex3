@@ -41,6 +41,8 @@ void Worker::run() {
       socket.send(&response);
 
       cout << "[W] Sent response of chunk '" << chunkURL << "'" << endl;
+
+      pthread_yield();
    }
 }
 

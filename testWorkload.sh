@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+for i in {0..4}; do rm -f "trace$i.txt"; done
+
 if [ "$#" -ne 1 ]; then
   echo "Usage: $(basename "$0") <URL://filelist.csv>"
   exit 1
@@ -33,9 +35,6 @@ for i in {1..4}; do
   if [ "$downloads" -lt 10 ]; then
     echo "Workload was not distributed evenly!" >&2
     echo "Worker $i was slacking." >&2
-    for j in {0..4}; do rm "trace$j.txt"; done
     exit 1
   fi
 done
-
-for i in {0..4}; do rm "trace$i.txt"; done

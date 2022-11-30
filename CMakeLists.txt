@@ -16,7 +16,7 @@ add_executable(coordinator
         Socket/Socket.cpp
         Coordinator/Coordinator.cpp
         )
-target_link_libraries(coordinator PUBLIC CURL::libcurl)
+target_link_libraries(coordinator PUBLIC CURL::libcurl pthread)
 
 add_executable(worker
         worker.cpp
@@ -28,5 +28,5 @@ add_executable(worker
         Worker/Worker.cpp
         Socket/Socket.cpp
         )
-target_link_libraries(worker PUBLIC CURL::libcurl)
+target_link_libraries(worker PUBLIC CURL::libcurl pthread)
 
